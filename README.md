@@ -1,6 +1,6 @@
 ## py-traider-data-collector
 
-`py-traider-data-collector` is a basic implementation of a python application that proces crypto prices from the coin gecko
+`py-traider-data-collector` is a basic implementation of a python application that process crypto prices from the coin gecko
 
 ## Disclaimer
 > This tool is limited to security research only, and the user assumes all legal and related responsibilities arising from its use! The author assumes no legal responsibility!
