@@ -1,3 +1,9 @@
 requests
 pyarrow
 pandas
+numpy
+matplotlib
+scikit-learn
+keras
+tensorflow
+statsmodels
