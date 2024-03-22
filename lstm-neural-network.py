@@ -15,7 +15,7 @@ scaler = MinMaxScaler()
 df_scaled = scaler.fit_transform(df[['price']])
 
 # Create sequences for LSTM
-sequence_length = 30  # Adjust as needed
+sequence_length = 31  # Adjust as needed
 X, y = [], []
 for i in range(len(df_scaled) - sequence_length):
     X.append(df_scaled[i: i + sequence_length])
@@ -31,7 +31,8 @@ y_train, y_test = y[:train_size], y[train_size:]
 # Build LSTM model
 model = Sequential()
 model.add(Input(shape=(sequence_length, 1)))
-model.add(LSTM(64, activation='relu', input_shape=(sequence_length, 1)))
+model.add(LSTM(64, activation='relu', return_sequences=True))
+model.add(LSTM(64))
 model.add(Dense(1))
 model.compile(optimizer='adam', loss='mean_squared_error')
 
@@ -43,10 +44,37 @@ y_pred = model.predict(X_test)
 y_pred_actual = scaler.inverse_transform(y_pred)
 y_test_actual = scaler.inverse_transform(y_test)
 
+# Assuming the last price in the CSV is from '2024-03-22'
+last_price_date = pd.to_datetime('2024-03-22')
+
+# Halving event date
+halving_date = pd.to_datetime('2024-04-21')
+
+# Calculate the number of days from the last data point to the halving event
+days_until_halving = (halving_date - last_price_date).days
+
+# Generate dates for plotting
+dates = pd.date_range(start=df.index.min(), periods=len(y_test_actual) + days_until_halving, freq='D')
+halving_date_position = len(dates) - days_until_halving
+
+
 # Plot actual vs. predicted prices
 plt.figure(figsize=(10, 6))
 plt.plot(y_test_actual, label='Actual BTC Price')
 plt.plot(y_pred_actual, label='Predicted BTC Price')
+
+# Add vertical lines for the last actual date and estimation date
+last_actual_date = df.index[-1]  # Last date in the dataset
+# Assuming you have the estimation date as a datetime object
+estimation_date = pd.to_datetime('2024-04-21')
+
+# Calculate positions for vertical lines
+last_actual_pos = len(y_test_actual) - len(y_pred_actual)
+estimation_pos = len(y_test_actual) + len(y_pred_actual) - 1  # If predicting one step ahead
+
+plt.axvline(x=last_actual_pos, color='grey', linestyle='--', label='Last Actual Date')
+plt.axvline(x=estimation_pos, color='red', linestyle='--', label='Estimation Date')
+
 plt.legend()
 plt.title('Bitcoin Price Prediction using LSTM')
 plt.xlabel('Time')
